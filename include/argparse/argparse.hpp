@@ -10,6 +10,7 @@
 #include <numeric>
 #include <optional>
 #include <source_location>
+#include <functional>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -34,7 +35,7 @@ namespace argparse {
 
         [[nodiscard]] static bool str_to_bool(const std::string &str) noexcept { return str == "true" ? true : false; }
 
-        [[nodiscard]] static std::string bool_to_str(const bool boolean) noexcept { return boolean ? "true" : "false"; }
+        [[nodiscard]] std::string bool_to_str(const bool boolean) noexcept { return boolean ? "true" : "false"; }
 
         [[nodiscard]] static std::string to_upper(const std::string &str)
         {
@@ -53,7 +54,7 @@ namespace argparse {
 
             std::stringstream result;
 
-            const auto format_helper = [&](const auto &value) {
+            [[maybe_unused]] const auto format_helper = [&](const auto &value) {
                 const auto placeholder = fmt.find('%');
                 result << fmt.substr(0, placeholder);
                 result << value;
@@ -603,7 +604,7 @@ namespace argparse {
 
                 this->check_enough_nargs(it, positional_args.end(), arg.nargs);
 
-                for (std::size_t i = 0; i < arg.nargs; ++i) {
+                for (int i = 0; i < arg.nargs; ++i) {
                     if (this->mapped_args.contains(*it)) {
                         throw exceptions::ArgparseException(
                           std::source_location::current(),
@@ -644,7 +645,7 @@ namespace argparse {
                         front             = std::to_string(amount);
                         it += amount;
 
-                        if (std::distance(optional_args.begin(), it) > (optional_args.size() - 1)) { break; }
+                        if ((std::size_t)std::distance(optional_args.begin(), it) > (optional_args.size() - 1)) { break; }
 
                         continue;
                     }
@@ -654,7 +655,7 @@ namespace argparse {
                         continue;
                     }
                     this->check_enough_nargs(it, optional_args.end(), arg.nargs);
-                    for (std::size_t i = 0; i < arg.nargs; ++i) { arg.values.at(arg.actual_size++) = *++it; }
+                    for (int i = 0; i < arg.nargs; ++i) { arg.values.at(arg.actual_size++) = *++it; }
                 } else if (!arg_found) {
                     if (arg.type == ArgTypes::BOOL) {
                         auto &front = arg.values.front();
@@ -665,7 +666,7 @@ namespace argparse {
             }
         }
 
-        void check_enough_nargs(auto it, const auto end, const std::size_t amount) const
+        void check_enough_nargs(auto it, const auto end, const int amount) const
         {
             if (it + (amount - 1) == end) {
                 throw exceptions::ArgparseException(
