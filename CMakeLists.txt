@@ -9,7 +9,8 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wconversion -Wpedantic -fsanitize=un
 include_directories(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/include")
 
 set(SOURCES
-    "${CMAKE_SOURCE_DIR}/src/main.cpp"
-)
+        "${CMAKE_SOURCE_DIR}/src/main.cpp"
+        "${CMAKE_SOURCE_DIR}/src/Lexer.cpp"
+        )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
