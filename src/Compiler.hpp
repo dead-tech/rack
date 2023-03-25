@@ -7,16 +7,20 @@
 
 class Compiler {
   public:
-    [[nodiscard]] static auto create() -> Compiler;
+    [[nodiscard]] static auto create(const std::string& target) -> Compiler;
 
+    [[nodiscard]] auto target() const -> std::string;
     [[nodiscard]] auto errors() const -> std::vector<RackError>;
+    [[nodiscard]] auto file_contents() const -> std::string;
 
     void push_error(const RackError& error);
 
   private:
-    Compiler();
+    explicit Compiler(std::string target);
 
+    std::string            m_target;
     std::vector<RackError> m_errors;
+    mutable std::string    m_file_contents;
 };
 
 #endif // COMPILER_HPP

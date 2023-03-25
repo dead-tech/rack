@@ -38,12 +38,14 @@ Token::Token(std::string lexeme, const TokenType type, const Span& span)
     m_type{ type },
     m_span{ span } {}
 
-auto Lexer::lex(const std::string& source)
+auto Lexer::lex(const Compiler& compiler)
   -> std::expected<std::vector<Token>, LexError> {
-    if (source.empty()) { return std::unexpected(LexError::EmptySource); }
+    if (compiler.file_contents().empty()) {
+        return std::unexpected(LexError::EmptySource);
+    }
 
     std::vector<Token> tokens;
-    Lexer              lexer(source);
+    Lexer              lexer(compiler);
 
     auto&& token = lexer.next();
     while (token.error() != LexError::Eof) {
@@ -56,9 +58,14 @@ auto Lexer::lex(const std::string& source)
     return tokens;
 }
 
-Lexer::Lexer(std::string source)
-  : m_source{ std::move(source) },
+Lexer::Lexer(const Compiler& compiler)
+  : m_compiler{ compiler },
+    m_source{ compiler.file_contents() },
     m_cursor{ 0 } {}
+
+auto Lexer::span(const std::size_t start, const std::size_t end) const -> Span {
+    return Span::create(this->m_compiler.target(), start, end);
+}
 
 auto Lexer::eof() const -> bool {
     return this->m_cursor >= this->m_source.size();
@@ -101,5 +108,5 @@ auto Lexer::next() -> std::expected<Token, LexError> {
 
     switch (current_char.value()) {}
 
-    return Token::create("2", TokenType::Number, Span::create(0, 1));
+    return Token::create("2", TokenType::Number, this->span(0, 1));
 }

@@ -1,6 +1,7 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
+#include "Compiler.hpp"
 #include "Utility.hpp"
 #include <cstdint>
 #include <expected>
@@ -35,11 +36,14 @@ class Token {
 
 class Lexer {
   public:
-    [[nodiscard]] static auto lex(const std::string& source)
+    [[nodiscard]] static auto lex(const Compiler& compiler)
       -> std::expected<std::vector<Token>, LexError>;
 
   private:
-    explicit Lexer(std::string source);
+    explicit Lexer(const Compiler& compiler);
+
+    [[nodiscard]] auto
+      span(const std::size_t start, const std::size_t end) const -> Span;
 
     [[nodiscard]] auto eof() const -> bool;
     [[nodiscard]] auto peek() const -> std::expected<char, LexError>;
@@ -47,6 +51,7 @@ class Lexer {
       -> std::expected<char, LexError>;
     [[nodiscard]] auto next() -> std::expected<Token, LexError>;
 
+    Compiler    m_compiler;
     std::string m_source;
     std::size_t m_cursor;
 };
