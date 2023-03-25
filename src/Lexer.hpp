@@ -9,6 +9,8 @@
 
 enum class LexError : std::uint64_t { Eof = 0, EmptySource, Max };
 
+// TODO: Maybe move this class into a utility file, as this could be useful to
+//       have in other files, without having to include the whole Lexer
 class Span {
   public:
     [[nodiscard]] static auto
