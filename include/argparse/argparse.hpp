@@ -658,8 +658,8 @@ namespace argparse {
                     for (int i = 0; i < arg.nargs; ++i) { arg.values.at(arg.actual_size++) = *++it; }
                 } else if (!arg_found) {
                     if (arg.type == ArgTypes::BOOL) {
-                        auto &front = arg.values.front();
-                        front       = arg.has_flag(ArgFlags::STORE_FALSE) ? front = "true" : front = "false";
+                        auto* front = arg.values.data();
+                        *front       = arg.has_flag(ArgFlags::STORE_FALSE) ? *front = "true" : *front = "false";
                         continue;
                     }
                 }
