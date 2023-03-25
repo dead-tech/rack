@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <expected>
+#include <fmt/format.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -63,6 +64,41 @@ class Lexer {
 
     std::string m_source;
     std::size_t m_cursor;
+};
+
+/// {fmt} Custom Formatters
+template<>
+struct fmt::formatter<Span> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const Span& span, FormatContext& ctx) {
+        return fmt::format_to(
+          ctx.out(), "Span {{ start: {}, end: {} }}", span.start(), span.end()
+        );
+    }
+};
+
+template<>
+struct fmt::formatter<Token> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const Token& token, FormatContext& ctx) {
+        return fmt::format_to(
+          ctx.out(),
+          "Token {{ lexeme: {}, type: {}, span: {} }}",
+          token.lexeme(),
+          token.type_to_string(),
+          token.span()
+        );
+    }
 };
 
 #endif // LEXER_HPP
