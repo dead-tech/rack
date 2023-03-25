@@ -13,6 +13,7 @@ set(SOURCES
         "${CMAKE_SOURCE_DIR}/src/Lexer.cpp"
         "${CMAKE_SOURCE_DIR}/src/Utility.cpp"
         "${CMAKE_SOURCE_DIR}/src/Compiler.cpp"
+        "${CMAKE_SOURCE_DIR}/src/Error.cpp"
         )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

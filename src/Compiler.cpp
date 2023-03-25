@@ -30,3 +30,13 @@ auto Compiler::file_contents() const -> std::string {
 void Compiler::push_error(const RackError& error) {
     this->m_errors.push_back(error);
 }
+
+void Compiler::print_errors() const {
+    for (const auto& error : this->m_errors) {
+        print_error(error, this->file_contents());
+    }
+    fmt::print(stderr, fmt::fg(fmt::color::red), "error");
+    fmt::print(
+      stderr, fmt::emphasis::bold, ": aborting due to previous error(s)\n"
+    );
+}

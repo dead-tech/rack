@@ -14,6 +14,7 @@ class Compiler {
     [[nodiscard]] auto file_contents() const -> std::string;
 
     void push_error(const RackError& error);
+    void print_errors() const;
 
   private:
     explicit Compiler(std::string target);

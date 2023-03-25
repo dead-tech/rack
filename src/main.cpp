@@ -3,6 +3,7 @@
 #include <dtslib/filesystem.hpp>
 #include <fmt/printf.h>
 
+#include "Compiler.hpp"
 
 int main(const int argc, const char** argv) {
     argparse::ArgumentParser parser(argc, argv);
@@ -15,16 +16,13 @@ int main(const int argc, const char** argv) {
     const auto        args = parser.parse_args();
     const std::string file = args.at("file").as<std::string>();
 
-    const auto file_contents = dts::read_file<std::string>(file);
-
-    if (!file_contents.has_value()) {
-        fmt::print(
-          "[ERROR]: error occurred while reading file {}: {}\n",
-          file,
-          dts::filesystem_error(file_contents.error())
-        );
-        return 1;
-    }
+    // FIXME: Find out why removing this print statement is making the compiler
+    //        crash
+    fmt::print("");
+    auto compiler = Compiler::create(file);
+    compiler.push_error(RackError{ .message = "test error",
+                                   .span    = Span::create(file, 33, 36) });
+    compiler.print_errors();
 
     return 0;
 }
