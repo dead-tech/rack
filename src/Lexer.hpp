@@ -1,6 +1,8 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
+#define FMT_HEADER_ONLY
+
 #include "Compiler.hpp"
 #include "Utility.hpp"
 #include <cstdint>

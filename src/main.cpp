@@ -1,24 +1,19 @@
 #define FMT_HEADER_ONLY
-#include <argparse/argparse.hpp>
 #include <dtslib/filesystem.hpp>
 #include <fmt/printf.h>
 
 #include "Compiler.hpp"
 
+void print_usage() { fmt::println("usage: rack <file.rack>"); }
+
 int main(const int argc, const char** argv) {
-    argparse::ArgumentParser parser(argc, argv);
-    parser.add_argument("file")
-      .set_nargs(1)
-      .set_type(argparse::ArgTypes::STRING)
-      .set_flags(argparse::ArgFlags::REQUIRED)
-      .set_help("path to file to compile");
+    if (argc < 2) {
+        print_usage();
+        return 1;
+    }
 
-    const auto        args = parser.parse_args();
-    const std::string file = args.at("file").as<std::string>();
+    const std::string file = argv[1];
 
-    // FIXME: Find out why removing this print statement is making the compiler
-    //        crash
-    fmt::print("");
     auto compiler = Compiler::create(file);
     compiler.push_error(RackError{ .message = "test error",
                                    .span    = Span::create(file, 33, 36) });

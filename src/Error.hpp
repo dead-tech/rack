@@ -1,6 +1,8 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 
+#define FMT_HEADER_ONLY
+
 #include "Utility.hpp"
 #include <dtslib/filesystem.hpp>
 #include <fmt/color.h>
