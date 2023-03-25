@@ -1,6 +1,8 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+#define FMT_HEADER_ONLY
+
 #include <cstdint>
 #include <fmt/format.h>
 

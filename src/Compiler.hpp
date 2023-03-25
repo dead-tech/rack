@@ -1,6 +1,8 @@
 #ifndef COMPILER_HPP
 #define COMPILER_HPP
 
+#define FMT_HEADER_ONLY
+
 #include "Error.hpp"
 #include <fmt/color.h>
 #include <fmt/format.h>
