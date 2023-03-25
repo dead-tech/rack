@@ -11,6 +11,7 @@ include_directories(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/include")
 set(SOURCES
         "${CMAKE_SOURCE_DIR}/src/main.cpp"
         "${CMAKE_SOURCE_DIR}/src/Lexer.cpp"
+        "${CMAKE_SOURCE_DIR}/src/Utility.cpp"
         )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

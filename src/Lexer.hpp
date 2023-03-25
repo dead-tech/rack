@@ -1,6 +1,7 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
+#include "Utility.hpp"
 #include <cstdint>
 #include <expected>
 #include <fmt/format.h>
@@ -9,22 +10,6 @@
 #include <vector>
 
 enum class LexError : std::uint64_t { Eof = 0, EmptySource, Max };
-
-// TODO: Maybe move this class into a utility file, as this could be useful to
-//       have in other files, without having to include the whole Lexer
-class Span {
-  public:
-    [[nodiscard]] static auto
-      create(const std::size_t start, const std::size_t end) -> Span;
-    [[nodiscard]] auto start() const -> std::size_t;
-    [[nodiscard]] auto end() const -> std::size_t;
-
-  private:
-    Span(const std::size_t start, const std::size_t end);
-
-    std::size_t m_start;
-    std::size_t m_end;
-};
 
 enum class TokenType : std::uint64_t { Number = 0, Plus, Max };
 
@@ -67,21 +52,6 @@ class Lexer {
 };
 
 /// {fmt} Custom Formatters
-template<>
-struct fmt::formatter<Span> {
-    template<typename ParseContext>
-    constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template<typename FormatContext>
-    auto format(const Span& span, FormatContext& ctx) {
-        return fmt::format_to(
-          ctx.out(), "Span {{ start: {}, end: {} }}", span.start(), span.end()
-        );
-    }
-};
-
 template<>
 struct fmt::formatter<Token> {
     template<typename ParseContext>
