@@ -2,6 +2,8 @@
 #define COMPILER_HPP
 
 #include "Error.hpp"
+#include <fmt/color.h>
+#include <fmt/format.h>
 #include <string>
 #include <vector>
 
