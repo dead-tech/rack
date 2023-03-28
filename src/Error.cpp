@@ -57,7 +57,8 @@ void print_error(const RackError& error, const std::string& file_contents) {
     // Print '^^^^' below span and error message next
     const auto spaces =
       std::string(error.span.start() - error_line_span.start(), ' ');
-    const auto carets = std::string(error.span.end() - error.span.start(), '^');
+    const auto carets =
+      std::string(error.span.end() - error.span.start() + 1, '^');
     fmt::print(
       stderr,
       fmt::fg(fmt::color::red),

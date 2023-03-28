@@ -128,17 +128,17 @@ auto Lexer::next() -> std::expected<Token, LexError> {
     switch (current_char.value()) {
         case ':': {
             return Token::create(
-              ":", TokenType::Colon, this->span(start, ++this->m_cursor)
+              ":", TokenType::Colon, this->span(start, this->m_cursor++)
             );
         }
         case ',': {
             return Token::create(
-              ",", TokenType::Comma, this->span(start, ++this->m_cursor)
+              ",", TokenType::Comma, this->span(start, this->m_cursor++)
             );
         }
         case '*': {
             return Token::create(
-              "*", TokenType::Asterisk, this->span(start, ++this->m_cursor)
+              "*", TokenType::Asterisk, this->span(start, this->m_cursor++)
             );
         }
         case '-': {
@@ -214,7 +214,7 @@ auto Lexer::lex_number() -> std::expected<Token, LexError> {
     }
 
     return Token::create(
-      number.str(), TokenType::Number, this->span(start, this->m_cursor)
+      number.str(), TokenType::Number, this->span(start, this->m_cursor - 1)
     );
 }
 
