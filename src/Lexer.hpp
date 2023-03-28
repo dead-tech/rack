@@ -96,4 +96,40 @@ struct fmt::formatter<Token> {
     }
 };
 
+template<>
+struct fmt::formatter<LexError> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const LexError& error, FormatContext& ctx) {
+        static_assert(
+          std::to_underlying(LexError::Max) == 3,
+          "[INTERNAL ERROR] fmt::formatter<LexError> requires to handle all "
+          "enum variants"
+        );
+
+        const auto enum_to_str = [](const LexError& error) {
+            switch (error) {
+                case LexError::Eof: {
+                    return "LexError::Eof";
+                }
+                case LexError::EmptySource: {
+                    return "LexError::EmptySource";
+                }
+                case LexError::UnexpectedCharacter: {
+                    return "LexError::UnexpectedCharacter";
+                }
+                default: {
+                    return "Unknown Lex Error";
+                }
+            }
+        }();
+
+        return fmt::format_to(ctx.out(), "{}", enum_to_str(error));
+    }
+};
+
 #endif // LEXER_HPP
