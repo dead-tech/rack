@@ -29,6 +29,7 @@ enum class TokenType : std::uint64_t {
     Colon,
     Comma,
     Asterisk,
+    Arrow,
     Max
 };
 
