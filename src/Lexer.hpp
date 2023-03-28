@@ -26,6 +26,7 @@ enum class TokenType : std::uint64_t {
     KeywordOrIdentifier,
     Minus,
     MinusMinus,
+    Colon,
     Max
 };
 

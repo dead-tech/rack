@@ -16,7 +16,7 @@ auto Token::span() const -> Span { return this->m_span; }
 
 auto Token::type_to_string() const -> std::string {
     static_assert(
-      std::to_underlying(TokenType::Max) == 5,
+      std::to_underlying(TokenType::Max) == 6,
       "[INTERNAL ERROR] Token::type_to_string(): Exhaustive handling of all "
       "enum "
       "variants is required"
@@ -35,6 +35,9 @@ auto Token::type_to_string() const -> std::string {
         }
         case TokenType::MinusMinus: {
             return "MinusMinus";
+        }
+        case TokenType::Colon: {
+            return "Colon";
         }
         default: {
             return "Unknown Token Type";
@@ -115,7 +118,13 @@ auto Lexer::next() -> std::expected<Token, LexError> {
         return std::unexpected(current_char.error());
     }
 
+    const auto start = this->m_cursor;
     switch (current_char.value()) {
+        case ':': {
+            return Token::create(
+              ":", TokenType::Colon, this->span(start, ++this->m_cursor)
+            );
+        }
         case '-': {
             return this->lex_minus();
         }
