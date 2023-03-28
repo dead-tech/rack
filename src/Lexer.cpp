@@ -152,7 +152,7 @@ auto Lexer::lex_keyword_identifier_or_number()
         return Token::create(
           ss.str(),
           TokenType::KeywordOrIdentifier,
-          this->span(start, this->m_cursor)
+          this->span(start, this->m_cursor - 1)
         );
     }
 
