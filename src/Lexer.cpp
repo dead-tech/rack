@@ -16,7 +16,7 @@ auto Token::span() const -> Span { return this->m_span; }
 
 auto Token::type_to_string() const -> std::string {
     static_assert(
-      std::to_underlying(TokenType::Max) == 9,
+      std::to_underlying(TokenType::Max) == 10,
       "[INTERNAL ERROR] Token::type_to_string(): Exhaustive handling of all "
       "enum "
       "variants is required"
@@ -47,6 +47,9 @@ auto Token::type_to_string() const -> std::string {
         }
         case TokenType::Arrow: {
             return "Arrow";
+        }
+        case TokenType::DoubleQuotedString: {
+            return "DoubleQuotedString";
         }
         default: {
             return "Unknown Token Type";
@@ -147,6 +150,9 @@ auto Lexer::next() -> std::expected<Token, LexError> {
         case '-': {
             return this->lex_minus();
         }
+        case '"': {
+            return this->lex_quoted_string();
+        }
         default: {
             // FIXME: Do something about the types
             return this->lex_keyword_identifier_or_number();
@@ -213,6 +219,7 @@ auto Lexer::lex_number() -> std::expected<Token, LexError> {
     while (!this->eof() && is_valid_digit(current_char)) {
         number << current_char;
         ++this->m_cursor;
+        // FIXME: This could crash, move this as the first thing that is done
         current_char = this->peek().value();
     }
 
@@ -255,4 +262,44 @@ auto Lexer::lex_minus() -> std::expected<Token, LexError> {
           "-", TokenType::Minus, this->span(start, this->m_cursor++)
         );
     }
+}
+
+auto Lexer::lex_quoted_string() -> std::expected<Token, LexError> {
+    // Skip first double quote
+    const auto start = this->m_cursor;
+    ++this->m_cursor;
+
+    // This means the string literal is not terminated
+    if (this->eof()) {
+        this->error(
+          "unexpected eof: unterminated string literal",
+          this->span(start, this->m_cursor)
+        );
+        return std::unexpected(LexError::Eof);
+    }
+
+    // This should be guaranteed as we have checked just above for eof
+    auto current_char = this->peek().value();
+    bool is_escaped   = false;
+
+    // TODO: Check against a proper delimiter, if we want to support for single
+    //       quoted strings
+    while (!this->eof() && (is_escaped || current_char != '"')) {
+        current_char = this->peek().value();
+
+        if (current_char == '\r' || current_char == '\n') {
+            ++this->m_cursor;
+            continue;
+        }
+
+        is_escaped = !is_escaped && current_char == '\\';
+        ++this->m_cursor;
+    }
+
+    const auto quoted =
+      this->m_source.substr(start + 1, this->m_cursor - start - 1);
+
+    return Token::create(
+      quoted, TokenType::DoubleQuotedString, this->span(start, this->m_cursor++)
+    );
 }

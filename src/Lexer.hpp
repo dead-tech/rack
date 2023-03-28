@@ -30,6 +30,7 @@ enum class TokenType : std::uint64_t {
     Comma,
     Asterisk,
     Arrow,
+    DoubleQuotedString,
     Max
 };
 
@@ -76,6 +77,7 @@ class Lexer {
       -> std::expected<Token, LexError>;
     [[nodiscard]] auto lex_number() -> std::expected<Token, LexError>;
     [[nodiscard]] auto lex_minus() -> std::expected<Token, LexError>;
+    [[nodiscard]] auto lex_quoted_string() -> std::expected<Token, LexError>;
 
     std::shared_ptr<Compiler> m_compiler;
     std::string               m_source;
