@@ -1,2 +1,4 @@
-34 35 + drop println
-440 20 - println
+fn main -- argc: i32, argv: u8** -> i32
+begin
+    "World, Hello\n" println
+end
