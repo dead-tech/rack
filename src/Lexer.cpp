@@ -16,7 +16,7 @@ auto Token::span() const -> Span { return this->m_span; }
 
 auto Token::type_to_string() const -> std::string {
     static_assert(
-      std::to_underlying(TokenType::Max) == 2,
+      std::to_underlying(TokenType::Max) == 3,
       "[INTERNAL ERROR] Token::type_to_string(): Exhaustive handling of all "
       "enum "
       "variants is required"
@@ -27,6 +27,9 @@ auto Token::type_to_string() const -> std::string {
             return "Number";
         case TokenType::Plus:
             return "Plus";
+        case TokenType::KeywordOrIdentifier: {
+            return "KeywordOrIdentifier";
+        }
         default: {
             return "Unknown Token Type";
         }
@@ -67,6 +70,10 @@ auto Lexer::span(const std::size_t start, const std::size_t end) const -> Span {
     return Span::create(this->m_compiler->target(), start, end);
 }
 
+void Lexer::error(const std::string& message, const Span& span) {
+    this->m_compiler->push_error(RackError{ message, span });
+}
+
 auto Lexer::eof() const -> bool {
     return this->m_cursor >= this->m_source.size();
 }
@@ -100,13 +107,76 @@ auto Lexer::next() -> std::expected<Token, LexError> {
     const auto current_char = this->peek();
     if (!current_char.has_value()) { return std::unexpected(LexError::Eof); }
 
-    static_assert(
-      std::to_underlying(TokenType::Max) == 2,
-      "[INTERNAL ERROR] Lexer::next(): Exhaustive handling of all enum "
-      "variants is required"
+    switch (current_char.value()) {
+        default: {
+            return this->lex_keyword_identifier_or_number();
+        }
+    }
+}
+
+auto Lexer::lex_keyword_identifier_or_number()
+  -> std::expected<Token, LexError> {
+    const auto start = this->m_cursor;
+    if (this->eof()) {
+        this->error("unexpected eof", this->span(start, start));
+        return std::unexpected(LexError::Eof);
+    }
+
+    // This should be guaranteed as we have just checked for eof
+    auto       current_char = this->peek().value();
+    const auto is_valid_char_for_identifier_or_keyword =
+      [](const auto ch) -> bool { return std::isalpha(ch) != 0 || ch == '_'; };
+
+    if (std::isdigit(current_char) != 0) {
+        return this->lex_number();
+    } else if (is_valid_char_for_identifier_or_keyword(current_char)) {
+        std::stringstream ss;
+        while (!this->eof()
+               && is_valid_char_for_identifier_or_keyword(current_char)) {
+            ss << current_char;
+            ++this->m_cursor;
+            current_char = this->peek().value();
+        }
+
+        return Token::create(
+          ss.str(),
+          TokenType::KeywordOrIdentifier,
+          this->span(start, this->m_cursor)
+        );
+    }
+
+    this->error(
+      fmt::format("unexpected character {}", current_char),
+      this->span(start, ++this->m_cursor)
     );
+    return std::unexpected(LexError::Eof);
+}
 
-    switch (current_char.value()) {}
+auto Lexer::lex_number() -> std::expected<Token, LexError> {
+    const auto start = this->m_cursor;
+    if (this->eof()) {
+        this->error("unexpected eof", this->span(start, start));
+        return std::unexpected(LexError::Eof);
+    }
 
-    return Token::create("2", TokenType::Number, this->span(0, 1));
+    // TODO: Add support for hex, octal and binary
+    constexpr std::string_view valid_digits   = "0123456789";
+    const auto                 is_valid_digit = [&](const auto ch) -> bool {
+        return valid_digits.find(ch) != std::string::npos;
+    };
+
+    std::stringstream number;
+
+    // TODO: Handle floating point numbers, digit separators, prefix literals,
+    //       suffix literals
+    auto current_char = this->peek().value();
+    while (!this->eof() && is_valid_digit(current_char)) {
+        number << current_char;
+        ++this->m_cursor;
+        current_char = this->peek().value();
+    }
+
+    return Token::create(
+      number.str(), TokenType::Number, this->span(start, this->m_cursor)
+    );
 }

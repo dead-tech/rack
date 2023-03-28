@@ -15,7 +15,12 @@
 
 enum class LexError : std::uint64_t { Eof = 0, EmptySource, Max };
 
-enum class TokenType : std::uint64_t { Number = 0, Plus, Max };
+enum class TokenType : std::uint64_t {
+    Number = 0,
+    Plus,
+    KeywordOrIdentifier,
+    Max
+};
 
 class Token {
   public:
@@ -48,11 +53,18 @@ class Lexer {
     [[nodiscard]] auto
       span(const std::size_t start, const std::size_t end) const -> Span;
 
+    void error(const std::string& message, const Span& span);
+
     [[nodiscard]] auto eof() const -> bool;
     [[nodiscard]] auto peek() const -> std::expected<char, LexError>;
     [[nodiscard]] auto peek_ahead(const std::size_t offset) const
       -> std::expected<char, LexError>;
     [[nodiscard]] auto next() -> std::expected<Token, LexError>;
+
+    [[nodiscard]] auto lex_keyword_identifier_or_number()
+      -> std::expected<Token, LexError>;
+
+    [[nodiscard]] auto lex_number() -> std::expected<Token, LexError>;
 
     std::shared_ptr<Compiler> m_compiler;
     std::string               m_source;
