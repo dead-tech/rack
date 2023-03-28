@@ -1,7 +1,7 @@
 #include "Compiler.hpp"
 
-auto Compiler::create(const std::string& target) -> Compiler {
-    return Compiler(target);
+auto Compiler::create(const std::string& target) -> std::shared_ptr<Compiler> {
+    return std::make_shared<Compiler>(Compiler(target));
 }
 
 Compiler::Compiler(std::string target)

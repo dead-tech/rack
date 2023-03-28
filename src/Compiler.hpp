@@ -11,7 +11,8 @@
 
 class Compiler {
   public:
-    [[nodiscard]] static auto create(const std::string& target) -> Compiler;
+    [[nodiscard]] static auto create(const std::string& target)
+      -> std::shared_ptr<Compiler>;
 
     [[nodiscard]] auto target() const -> std::string;
     [[nodiscard]] auto errors() const -> std::vector<RackError>;

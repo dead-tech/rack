@@ -38,9 +38,9 @@ Token::Token(std::string lexeme, const TokenType type, const Span& span)
     m_type{ type },
     m_span{ span } {}
 
-auto Lexer::lex(const Compiler& compiler)
+auto Lexer::lex(const std::shared_ptr<Compiler>& compiler)
   -> std::expected<std::vector<Token>, LexError> {
-    if (compiler.file_contents().empty()) {
+    if (compiler->file_contents().empty()) {
         return std::unexpected(LexError::EmptySource);
     }
 
@@ -58,13 +58,13 @@ auto Lexer::lex(const Compiler& compiler)
     return tokens;
 }
 
-Lexer::Lexer(const Compiler& compiler)
+Lexer::Lexer(const std::shared_ptr<Compiler>& compiler)
   : m_compiler{ compiler },
-    m_source{ compiler.file_contents() },
+    m_source{ compiler->file_contents() },
     m_cursor{ 0 } {}
 
 auto Lexer::span(const std::size_t start, const std::size_t end) const -> Span {
-    return Span::create(this->m_compiler.target(), start, end);
+    return Span::create(this->m_compiler->target(), start, end);
 }
 
 auto Lexer::eof() const -> bool {

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <expected>
 #include <fmt/format.h>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,11 +39,11 @@ class Token {
 
 class Lexer {
   public:
-    [[nodiscard]] static auto lex(const Compiler& compiler)
+    [[nodiscard]] static auto lex(const std::shared_ptr<Compiler>& compiler)
       -> std::expected<std::vector<Token>, LexError>;
 
   private:
-    explicit Lexer(const Compiler& compiler);
+    explicit Lexer(const std::shared_ptr<Compiler>& compiler);
 
     [[nodiscard]] auto
       span(const std::size_t start, const std::size_t end) const -> Span;
@@ -53,9 +54,9 @@ class Lexer {
       -> std::expected<char, LexError>;
     [[nodiscard]] auto next() -> std::expected<Token, LexError>;
 
-    Compiler    m_compiler;
-    std::string m_source;
-    std::size_t m_cursor;
+    std::shared_ptr<Compiler> m_compiler;
+    std::string               m_source;
+    std::size_t               m_cursor;
 };
 
 /// {fmt} Custom Formatters

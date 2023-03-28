@@ -14,10 +14,10 @@ int main(const int argc, const char** argv) {
 
     const std::string file = argv[1];
 
-    auto compiler = Compiler::create(file);
-    compiler.push_error(RackError{ .message = "test error",
-                                   .span    = Span::create(file, 33, 36) });
-    compiler.print_errors();
+    std::shared_ptr<Compiler> compiler = Compiler::create(file);
+    compiler->push_error(RackError{ .message = "test error",
+                                    .span    = Span::create(file, 33, 36) });
+    compiler->print_errors();
 
     return 0;
 }
