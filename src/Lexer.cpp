@@ -16,7 +16,7 @@ auto Token::span() const -> Span { return this->m_span; }
 
 auto Token::type_to_string() const -> std::string {
     static_assert(
-      std::to_underlying(TokenType::Max) == 3,
+      std::to_underlying(TokenType::Max) == 5,
       "[INTERNAL ERROR] Token::type_to_string(): Exhaustive handling of all "
       "enum "
       "variants is required"
@@ -29,6 +29,12 @@ auto Token::type_to_string() const -> std::string {
             return "Plus";
         case TokenType::KeywordOrIdentifier: {
             return "KeywordOrIdentifier";
+        }
+        case TokenType::Minus: {
+            return "Minus";
+        }
+        case TokenType::MinusMinus: {
+            return "MinusMinus";
         }
         default: {
             return "Unknown Token Type";
@@ -110,6 +116,9 @@ auto Lexer::next() -> std::expected<Token, LexError> {
     }
 
     switch (current_char.value()) {
+        case '-': {
+            return this->lex_minus();
+        }
         default: {
             return this->lex_keyword_identifier_or_number();
         }
@@ -181,4 +190,35 @@ auto Lexer::lex_number() -> std::expected<Token, LexError> {
     return Token::create(
       number.str(), TokenType::Number, this->span(start, this->m_cursor)
     );
+}
+
+auto Lexer::lex_minus() -> std::expected<Token, LexError> {
+    const auto start = this->m_cursor;
+    ++this->m_cursor;
+    const auto next_char = this->peek();
+
+    if (next_char.has_value()) {
+        switch (next_char.value()) {
+            case '-': {
+                return Token::create(
+                  "--",
+                  TokenType::MinusMinus,
+                  this->span(start, this->m_cursor++)
+                );
+            }
+            default: {
+                this->error(
+                  fmt::format(
+                    "unexpected char: {} after '-' ", next_char.value()
+                  ),
+                  this->span(start, this->m_cursor++)
+                );
+                return std::unexpected(LexError::UnexpectedCharacter);
+            }
+        }
+    } else {
+        return Token::create(
+          "-", TokenType::Minus, this->span(start, this->m_cursor++)
+        );
+    }
 }

@@ -18,6 +18,12 @@ int main(const int argc, const char** argv) {
     const std::shared_ptr<Compiler> compiler = Compiler::create(file);
     const auto                      tokens   = Lexer::lex(compiler);
 
+    if (!tokens.has_value()) {
+        fmt::print(stderr, "[INTERNAL ERROR] lex error: {}\n", tokens.error());
+        compiler->print_errors();
+        return 1;
+    }
+
     // FIXME: Create a compiler flag to enable printing the lexed tokens
     for (const auto& token : tokens.value()) { fmt::println("{}", token); }
 

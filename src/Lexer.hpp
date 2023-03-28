@@ -24,6 +24,8 @@ enum class TokenType : std::uint64_t {
     Number = 0,
     Plus,
     KeywordOrIdentifier,
+    Minus,
+    MinusMinus,
     Max
 };
 
@@ -68,8 +70,8 @@ class Lexer {
 
     [[nodiscard]] auto lex_keyword_identifier_or_number()
       -> std::expected<Token, LexError>;
-
     [[nodiscard]] auto lex_number() -> std::expected<Token, LexError>;
+    [[nodiscard]] auto lex_minus() -> std::expected<Token, LexError>;
 
     std::shared_ptr<Compiler> m_compiler;
     std::string               m_source;
@@ -126,7 +128,7 @@ struct fmt::formatter<LexError> {
                     return "Unknown Lex Error";
                 }
             }
-        }();
+        };
 
         return fmt::format_to(ctx.out(), "{}", enum_to_str(error));
     }
