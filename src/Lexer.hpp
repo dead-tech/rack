@@ -27,6 +27,7 @@ enum class TokenType : std::uint64_t {
     Minus,
     MinusMinus,
     Colon,
+    Comma,
     Max
 };
 
