@@ -217,10 +217,9 @@ auto Lexer::lex_number() -> std::expected<Token, LexError> {
     //       suffix literals
     auto current_char = this->peek().value();
     while (!this->eof() && is_valid_digit(current_char)) {
+        current_char = this->peek().value();
         number << current_char;
         ++this->m_cursor;
-        // FIXME: This could crash, move this as the first thing that is done
-        current_char = this->peek().value();
     }
 
     return Token::create(
