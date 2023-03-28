@@ -154,7 +154,6 @@ auto Lexer::next() -> std::expected<Token, LexError> {
             return this->lex_quoted_string();
         }
         default: {
-            // FIXME: Do something about the types
             return this->lex_keyword_identifier_or_number();
         }
     }
@@ -171,11 +170,11 @@ auto Lexer::lex_keyword_identifier_or_number()
     // This should be guaranteed as we have just checked for eof
     auto       current_char = this->peek().value();
     const auto is_valid_char_for_identifier_or_keyword =
-      [](const auto ch) -> bool { return std::isalpha(ch) != 0 || ch == '_'; };
+      [](const auto ch) -> bool { return std::isalnum(ch) != 0 || ch == '_'; };
 
     if (std::isdigit(current_char) != 0) {
         return this->lex_number();
-    } else if (is_valid_char_for_identifier_or_keyword(current_char)) {
+    } else if (std::isalpha(current_char) != 0 || current_char == '_') {
         std::stringstream ss;
         while (!this->eof()
                && is_valid_char_for_identifier_or_keyword(current_char)) {
