@@ -16,7 +16,7 @@ auto Token::span() const -> Span { return this->m_span; }
 
 auto Token::type_to_string() const -> std::string {
     static_assert(
-      std::to_underlying(TokenType::Max) == 7,
+      std::to_underlying(TokenType::Max) == 8,
       "[INTERNAL ERROR] Token::type_to_string(): Exhaustive handling of all "
       "enum "
       "variants is required"
@@ -41,6 +41,9 @@ auto Token::type_to_string() const -> std::string {
         }
         case TokenType::Comma: {
             return "Comma";
+        }
+        case TokenType::Asterisk: {
+            return "Asterisk";
         }
         default: {
             return "Unknown Token Type";
@@ -131,6 +134,11 @@ auto Lexer::next() -> std::expected<Token, LexError> {
         case ',': {
             return Token::create(
               ",", TokenType::Comma, this->span(start, ++this->m_cursor)
+            );
+        }
+        case '*': {
+            return Token::create(
+              "*", TokenType::Asterisk, this->span(start, ++this->m_cursor)
             );
         }
         case '-': {
