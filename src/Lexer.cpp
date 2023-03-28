@@ -52,7 +52,7 @@ auto Lexer::lex(const std::shared_ptr<Compiler>& compiler)
 
     auto&& token = lexer.next();
     while (token.error() != LexError::Eof) {
-        if (!token.has_value()) { return std::unexpected(LexError::Eof); }
+        if (!token.has_value()) { return std::unexpected(token.error()); }
 
         tokens.push_back(token.value());
         token = lexer.next();
@@ -105,7 +105,9 @@ auto Lexer::next() -> std::expected<Token, LexError> {
     }
 
     const auto current_char = this->peek();
-    if (!current_char.has_value()) { return std::unexpected(LexError::Eof); }
+    if (!current_char.has_value()) {
+        return std::unexpected(current_char.error());
+    }
 
     switch (current_char.value()) {
         default: {
@@ -149,7 +151,7 @@ auto Lexer::lex_keyword_identifier_or_number()
       fmt::format("unexpected character {}", current_char),
       this->span(start, ++this->m_cursor)
     );
-    return std::unexpected(LexError::Eof);
+    return std::unexpected(LexError::UnexpectedCharacter);
 }
 
 auto Lexer::lex_number() -> std::expected<Token, LexError> {

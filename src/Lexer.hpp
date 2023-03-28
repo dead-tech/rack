@@ -13,7 +13,12 @@
 #include <utility>
 #include <vector>
 
-enum class LexError : std::uint64_t { Eof = 0, EmptySource, Max };
+enum class LexError : std::uint64_t {
+    Eof = 0,
+    EmptySource,
+    UnexpectedCharacter,
+    Max
+};
 
 enum class TokenType : std::uint64_t {
     Number = 0,
