@@ -8,6 +8,8 @@
 
 void print_usage() { fmt::println("usage: rack <file.rack>"); }
 
+// TODO: Create a flag to specify output file name
+// TODO: Make it so nasm and the linker are invoked automatically
 int main(const int argc, const char** argv) {
     if (argc < 2) {
         print_usage();
