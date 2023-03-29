@@ -295,7 +295,7 @@ auto Lexer::lex_quoted_string() -> std::expected<Token, LexError> {
     }
 
     const auto quoted =
-      this->m_source.substr(start + 1, this->m_cursor - start - 1);
+      this->m_source.substr(start + 1, this->m_cursor - start - 2);
 
     return Token::create(
       quoted, TokenType::DoubleQuotedString, this->span(start, this->m_cursor++)
