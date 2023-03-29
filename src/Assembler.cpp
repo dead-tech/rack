@@ -86,6 +86,11 @@ auto Assembler_x86_64::next() -> std::expected<void, AssembleError> {
 
     switch (current_token.value().type()) {
         case TokenType::KeywordOrIdentifier: {
+            static_assert(
+              std::to_underlying(TokenType::Max) == 10,
+              "[INTERNAL ERROR] Assembler_x86_64::next() requires to handle "
+              "all enum variants"
+            );
             if (lexeme == "fn") {
                 return this->compile_function();
             } else {
