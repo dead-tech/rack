@@ -14,6 +14,7 @@ set(SOURCES
         "${CMAKE_SOURCE_DIR}/src/Utility.cpp"
         "${CMAKE_SOURCE_DIR}/src/Compiler.cpp"
         "${CMAKE_SOURCE_DIR}/src/Error.cpp"
+        "${CMAKE_SOURCE_DIR}/src/Assembler.cpp"
         )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

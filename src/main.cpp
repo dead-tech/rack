@@ -2,6 +2,7 @@
 #include <dtslib/filesystem.hpp>
 #include <fmt/printf.h>
 
+#include "Assembler.hpp"
 #include "Compiler.hpp"
 #include "Lexer.hpp"
 
@@ -25,7 +26,18 @@ int main(const int argc, const char** argv) {
     }
 
     // FIXME: Create a compiler flag to enable printing the lexed tokens
-    for (const auto& token : tokens.value()) { fmt::println("{}", token); }
+    // for (const auto& token : tokens.value()) { fmt::println("{}", token); }
+
+    const auto compile_result =
+      Assembler_x86_64::compile(compiler, tokens.value());
+
+    if (!compile_result.has_value()) {
+        fmt::print(
+          stderr, "[INTERNAL ERROR] compile error: {}\n", compile_result.error()
+        );
+        compiler->print_errors();
+        return 1;
+    }
 
     // TODO: Add a shortcut such as compiler.has_errors()
     // As a final stage, print compiler errors if present
