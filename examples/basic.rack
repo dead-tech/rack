@@ -1,4 +1,4 @@
 fn main -> i32
 begin
-    "Rack from, World Hello\n" puts
+    "Hello, world!\n" puts
 end
