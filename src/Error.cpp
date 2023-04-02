@@ -28,11 +28,11 @@ void print_error(const RackError& error, const std::string& file_contents) {
     for (std::size_t line_index = 0; line_index < line_spans.size();
          ++line_index) {
         const auto& line_span = line_spans[line_index];
-        if (error.span.start() >= line_span.start() && error.span.start() <= line_span.end()) {
+        if (error.span.start() + 1 >= line_span.start() && error.span.start() + 1 <= line_span.end()) {
             error_line_index = line_index;
         }
 
-        if (error.span.end() >= line_span.start() && error.span.end() <= line_span.end()) {
+        if (error.span.end() + 1 >= line_span.start() && error.span.end() + 1 <= line_span.end()) {
             error_line_number = line_index + 1;
         }
     }
@@ -42,7 +42,7 @@ void print_error(const RackError& error, const std::string& file_contents) {
       " --> {}:{}:{}",
       error.span.file_id(),
       error_line_number,
-      error.span.start()
+      error.span.start() + 1
     );
     fmt::println(stderr, "  |");
     fmt::print(stderr, "  {} \t", error_line_number);
@@ -50,15 +50,16 @@ void print_error(const RackError& error, const std::string& file_contents) {
     // Print error line contents
     const auto& error_line_span     = line_spans[error_line_index];
     const auto  error_line_contents = file_contents.substr(
-      error_line_span.start(), error_line_span.start() + error_line_span.end()
+      error_line_span.start() - 1,
+      (error_line_span.end() - error_line_span.start() + 1)
     );
     fmt::print(stderr, "{}", error_line_contents);
 
     // Print '^^^^' below span and error message next
     const auto spaces =
-      std::string(error.span.start() - error_line_span.start(), ' ');
+      std::string(error.span.start() + 1 - error_line_span.start(), ' ');
     const auto carets =
-      std::string(error.span.end() - error.span.start() + 1, '^');
+      std::string(error.span.end() + 1 - error.span.start() + 1, '^');
     fmt::print(
       stderr,
       fmt::fg(fmt::color::red),
