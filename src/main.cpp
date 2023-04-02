@@ -10,7 +10,7 @@
 
 static bool
   invoke_external_command(const std::string& command, const bool verbose) {
-    if (verbose) { fmt::print(stdout, "[INFO] {}\n", command); }
+    const auto start = std::chrono::steady_clock::now();
 
     const auto executable_name = [&]() {
         if (const auto space_index = command.find(' ');
@@ -33,10 +33,20 @@ static bool
     }
 
     pclose(executable_process);
+
+    const auto end = std::chrono::steady_clock::now();
+    if (verbose) {
+        fmt::print(
+          stdout,
+          "[INFO] {}........{:.2f}s\n",
+          command,
+          static_cast<std::chrono::duration<double>>(end - start).count()
+        );
+    }
+
     return true;
 }
 
-// TODO: Time each phase
 int main(const int argc, const char** argv) {
     argparse::ArgumentParser parser("rack", "0.0.1");
     parser.add_argument("file").help("path to rack file to compile");
@@ -65,10 +75,6 @@ int main(const int argc, const char** argv) {
 
     const auto verbose = parser.get<bool>("--verbose");
 
-    if (verbose) {
-        fmt::print(stdout, "[INFO] Compiling (Lexing, Generating Assembly)\n");
-    }
-
     auto              input_file      = parser.get<std::string>("file");
     const auto        input_file_path = std::filesystem::path(input_file);
     const std::string input_file_path_without_extension =
@@ -85,6 +91,8 @@ int main(const int argc, const char** argv) {
     const auto        output_file_path = std::filesystem::path(output_file);
     const std::string output_file_path_without_extension =
       output_file_path.parent_path() / output_file_path.stem();
+
+    const auto compilation_start = std::chrono::steady_clock::now();
 
     const std::shared_ptr<Compiler> compiler =
       Compiler::create(input_file, output_file);
@@ -115,6 +123,19 @@ int main(const int argc, const char** argv) {
     if (compiler->has_errors()) {
         compiler->print_errors();
         return 1;
+    }
+
+    const auto compilation_end = std::chrono::steady_clock::now();
+
+    if (verbose) {
+        fmt::print(
+          stdout,
+          "[INFO] Compiled in........{:.2f}s\n",
+          static_cast<std::chrono::duration<double>>(
+            compilation_end - compilation_start
+          )
+            .count()
+        );
     }
 
     // Now we can invoke nasm and then link
