@@ -13,7 +13,7 @@ auto Assembler_x86_64::compile(
   const std::shared_ptr<Compiler>& compiler,
   const std::vector<Token>&        tokens
 ) -> std::expected<void, AssembleError> {
-    const auto output_path     = std::filesystem::path(compiler->target());
+    const auto output_path     = std::filesystem::path(compiler->output());
     const auto parent_path     = output_path.parent_path();
     const auto output_filename = fmt::format(
       "{}/{}.asm", parent_path.string(), output_path.stem().string()

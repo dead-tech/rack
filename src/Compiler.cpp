@@ -1,12 +1,14 @@
 #include "Compiler.hpp"
 
-auto Compiler::create(const std::string& target) -> std::shared_ptr<Compiler> {
-    return std::make_shared<Compiler>(Compiler(target));
+auto Compiler::create(const std::string& target, const std::string& output)
+  -> std::shared_ptr<Compiler> {
+    return std::make_shared<Compiler>(Compiler(target, output));
 }
 
-Compiler::Compiler(std::string target)
+Compiler::Compiler(std::string target, std::string output)
   : m_target{ std::move(target) },
-    m_errors{ {} } {}
+    m_errors{ {} },
+    m_output{ std::move(output) } {}
 
 auto Compiler::target() const -> std::string { return this->m_target; }
 
@@ -28,6 +30,8 @@ auto Compiler::file_contents() const -> std::string {
 
     return this->m_file_contents;
 }
+
+auto Compiler::output() const -> std::string { return this->m_output; }
 
 void Compiler::push_error(const RackError& error) {
     this->m_errors.push_back(error);

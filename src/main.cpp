@@ -36,6 +36,7 @@ static bool
     return true;
 }
 
+// TODO: Time each phase
 int main(const int argc, const char** argv) {
     argparse::ArgumentParser parser("rack", "0.0.1");
     parser.add_argument("file").help("path to rack file to compile");
@@ -62,12 +63,31 @@ int main(const int argc, const char** argv) {
         fmt::print(stderr, "{}\n", parser.help().str());
     }
 
-    if (parser["--verbose"] == true) {
+    const auto verbose = parser.get<bool>("--verbose");
+
+    if (verbose) {
         fmt::print(stdout, "[INFO] Compiling (Lexing, Generating Assembly)\n");
     }
 
+    auto              input_file      = parser.get<std::string>("file");
+    const auto        input_file_path = std::filesystem::path(input_file);
+    const std::string input_file_path_without_extension =
+      input_file_path.parent_path() / input_file_path.stem();
+
+    const auto output_file = [&]() {
+        if (const auto output = parser.present("--output")) {
+            return parser.get<std::string>("--output");
+        } else {
+            return input_file;
+        }
+    }();
+
+    const auto        output_file_path = std::filesystem::path(output_file);
+    const std::string output_file_path_without_extension =
+      output_file_path.parent_path() / output_file_path.stem();
+
     const std::shared_ptr<Compiler> compiler =
-      Compiler::create(parser.get<std::string>("file"));
+      Compiler::create(input_file, output_file);
     const auto tokens = Lexer::lex(compiler);
 
     if (!tokens.has_value()) {
@@ -98,60 +118,21 @@ int main(const int argc, const char** argv) {
     }
 
     // Now we can invoke nasm and then link
-    const auto file_path =
-      std::filesystem::path(parser.get<std::string>("file"));
-    const std::string file_path_without_extension =
-      file_path.parent_path() / file_path.stem();
+    const std::string nasm_command = fmt::format(
+      "nasm -f elf64 {}.asm -o {}.o",
+      output_file_path_without_extension,
+      output_file_path_without_extension
+    );
 
-    // TODO: Optimize this
-    const std::string nasm_command = [&]() {
-        if (const auto output_file = parser.present("--output")) {
-            const auto output_path =
-              std::filesystem::path(parser.get<std::string>("--output"));
-            const std::string output_path_without_extension =
-              output_path.parent_path() / output_path.stem();
-            return fmt::format(
-              "nasm -f elf64 {}.asm -o {}.o",
-              output_path_without_extension,
-              output_path_without_extension
-            );
-        } else {
-            return fmt::format(
-              "nasm -f elf64 {}.asm -o {}.o",
-              file_path_without_extension,
-              file_path_without_extension
-            );
-        }
-    }();
+    if (!invoke_external_command(nasm_command, verbose)) { return 1; }
 
-    if (!invoke_external_command(nasm_command, parser.get<bool>("--verbose"))) {
-        return 1;
-    }
+    const std::string ld_command = fmt::format(
+      "ld {}.o -o {}",
+      output_file_path_without_extension,
+      output_file_path.string()
+    );
 
-    // Optimize this
-    const std::string ld_command = [&]() {
-        if (const auto output_file = parser.present("--output")) {
-            const auto output_path =
-              std::filesystem::path(parser.get<std::string>("--output"));
-            const std::string output_path_without_extension =
-              output_path.parent_path() / output_path.stem();
-            return fmt::format(
-              "ld {}.o -o {}",
-              output_path_without_extension,
-              output_path.string()
-            );
-        } else {
-            return fmt::format(
-              "ld {}.o -o {}",
-              file_path_without_extension,
-              file_path_without_extension
-            );
-        }
-    }();
-
-    if (!invoke_external_command(ld_command, parser.get<bool>("--verbose"))) {
-        return 1;
-    }
+    if (!invoke_external_command(ld_command, verbose)) { return 1; }
 
     return 0;
 }

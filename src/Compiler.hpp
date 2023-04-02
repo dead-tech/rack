@@ -11,12 +11,14 @@
 
 class Compiler {
   public:
-    [[nodiscard]] static auto create(const std::string& target)
-      -> std::shared_ptr<Compiler>;
+    [[nodiscard]] static auto
+      create(const std::string& target, const std::string& output)
+        -> std::shared_ptr<Compiler>;
 
     [[nodiscard]] auto target() const -> std::string;
     [[nodiscard]] auto errors() const -> std::vector<RackError>;
     [[nodiscard]] auto file_contents() const -> std::string;
+    [[nodiscard]] auto output() const -> std::string;
 
     [[nodiscard]] auto has_errors() const -> bool;
 
@@ -24,11 +26,12 @@ class Compiler {
     void print_errors() const;
 
   private:
-    explicit Compiler(std::string target);
+    Compiler(std::string target, std::string output);
 
     std::string            m_target;
     std::vector<RackError> m_errors;
     mutable std::string    m_file_contents;
+    std::string            m_output;
 };
 
 #endif // COMPILER_HPP
