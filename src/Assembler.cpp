@@ -200,6 +200,27 @@ auto Assembler_x86_64::next() -> std::expected<void, AssembleError> {
     return {};
 }
 
+auto Assembler_x86_64::find_nearest_end() const
+  -> std::expected<std::size_t, AssembleError> {
+    const auto index = std::distance(
+      this->m_tokens.begin(),
+      std::find_if(
+        this->m_tokens.begin(),
+        this->m_tokens.end(),
+        [](const auto& token) {
+            return token.lexeme() == "end"
+                   && token.type() == TokenType::KeywordOrIdentifier;
+        }
+      )
+    );
+
+    if (static_cast<std::size_t>(index) >= this->m_tokens.size()) {
+        return std::unexpected(AssembleError::NoEndToken);
+    }
+
+    return index;
+}
+
 auto Assembler_x86_64::compile_function()
   -> std::expected<void, AssembleError> {
     // Skip "fn" token
@@ -278,15 +299,13 @@ auto Assembler_x86_64::compile_function()
     }
     ++this->m_cursor;
 
-    const auto function_body_result =
-      this->compile_function_body(begin_token->span());
+    const auto function_body_result = this->compile_function_body();
 
-    const auto end_token = this->peek();
-    if (!end_token.has_value()) {
+    if (!function_body_result.has_value()) {
         this->error(
           "expected end token after function body", this->peek()->span()
         );
-        return std::unexpected(AssembleError::NoEndToken);
+        return std::unexpected(function_body_result.error());
     }
     ++this->m_cursor;
 
@@ -295,15 +314,14 @@ auto Assembler_x86_64::compile_function()
     return {};
 }
 
-auto Assembler_x86_64::compile_function_body(const Span& begin_span)
+auto Assembler_x86_64::compile_function_body()
   -> std::expected<void, AssembleError> {
     auto&& token = this->peek();
-    if (!token.has_value()) {
-        this->error("expected end token after function body", begin_span);
-        return std::unexpected(AssembleError::NoEndToken);
-    }
 
-    while (token->lexeme() != "end") {
+    const auto end_index = this->find_nearest_end();
+    if (!end_index.has_value()) { return std::unexpected(end_index.error()); }
+
+    while (this->m_cursor != end_index.value()) {
         switch (token->type()) {
             case TokenType::DoubleQuotedString: {
                 this->compile_double_quoted_string(token.value());

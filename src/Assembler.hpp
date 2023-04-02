@@ -75,8 +75,11 @@ class Assembler_x86_64 : public Assembler {
       -> std::expected<Token, AssembleError>;
     [[nodiscard]] auto next() -> std::expected<void, AssembleError>;
 
+    [[nodiscard]] auto find_nearest_end() const
+      -> std::expected<std::size_t, AssembleError>;
+
     [[nodiscard]] auto compile_function() -> std::expected<void, AssembleError>;
-    [[nodiscard]] auto compile_function_body(const Span& begin_span)
+    [[nodiscard]] auto compile_function_body()
       -> std::expected<void, AssembleError>;
     void               compile_double_quoted_string(const Token& token);
     [[nodiscard]] auto compile_keyword(const Token& token)
