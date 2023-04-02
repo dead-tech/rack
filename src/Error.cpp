@@ -50,14 +50,14 @@ void print_error(const RackError& error, const std::string& file_contents) {
     // Print error line contents
     const auto& error_line_span     = line_spans[error_line_index];
     const auto  error_line_contents = file_contents.substr(
-      error_line_span.start() - 1,
+      error_line_span.start(),
       (error_line_span.end() - error_line_span.start() + 1)
     );
     fmt::print(stderr, "{}", error_line_contents);
 
     // Print '^^^^' below span and error message next
     const auto spaces =
-      std::string(error.span.start() + 1 - error_line_span.start(), ' ');
+      std::string(error.span.start() - error_line_span.start(), ' ');
     const auto carets =
       std::string(error.span.end() + 1 - error.span.start() + 1, '^');
     fmt::print(
