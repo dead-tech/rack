@@ -1,5 +1,6 @@
 #include "Error.hpp"
 #define FMT_HEADER_ONLY
+#include <argparse/argparse.hpp>
 #include <dtslib/filesystem.hpp>
 #include <fmt/printf.h>
 
@@ -7,20 +8,30 @@
 #include "Compiler.hpp"
 #include "Lexer.hpp"
 
-void print_usage() { fmt::println("usage: rack <file.rack>"); }
-
 // TODO: Create a flag to specify output file name
 // TODO: Make it so nasm and the linker are invoked automatically
-int main(const int argc, const char** argv) {
-    if (argc < 2) {
-        print_usage();
-        return 1;
+int main([[maybe_unused]] const int argc, const char** argv) {
+    argparse::ArgumentParser parser("rack", "0.0.1");
+    parser.add_argument("file").help("path to rack file to compile");
+    parser.add_argument("-o", "--output").help("compiled binary output path");
+    parser.add_argument("-s", "--generate-asm")
+      .help("generate assembly intermediate file");
+    parser.add_argument("-T", "--lexed-tokens")
+      .help("prints lexed tokens to stdout");
+
+    try {
+        parser.parse_args(argc, argv);
+    } catch (const std::runtime_error& err) {
+        fmt::print(
+          stderr, fmt::fg(fmt::color::red) | fmt::emphasis::bold, "error: "
+        );
+        fmt::print(stderr, fmt::emphasis::bold, "{}\n", err.what());
+        fmt::print(stderr, "{}\n", parser.help().str());
     }
 
-    const std::string file = argv[1];
-
-    const std::shared_ptr<Compiler> compiler = Compiler::create(file);
-    const auto                      tokens   = Lexer::lex(compiler);
+    const std::shared_ptr<Compiler> compiler =
+      Compiler::create(parser.get<std::string>("file"));
+    const auto tokens = Lexer::lex(compiler);
 
     if (!tokens.has_value()) {
         fmt::print(stderr, "[INTERNAL ERROR] lex error: {}\n", tokens.error());
