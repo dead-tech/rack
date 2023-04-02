@@ -39,9 +39,6 @@ Assembler_x86_64::Assembler_x86_64(
 
 auto Assembler_x86_64::compile_to_assembly()
   -> std::expected<void, AssembleError> {
-    // TODO: Make it an actual valid assembly with the boiler plate,
-    //       initialization and stuff...
-
     // Things like: BITS64, section .text, global _start...
     this->generate_assembly_header();
 
@@ -64,9 +61,6 @@ auto Assembler_x86_64::compile_to_assembly()
 }
 
 auto Assembler_x86_64::generate_assembly_prelude() -> void {
-    // TODO: Create an assembly file containing the prelude and include that,
-    //       instead of doings this the hard way
-
     // print
     this->writeln("print:");
     this->writeln("\tmov r9, -3689348814741910323");
