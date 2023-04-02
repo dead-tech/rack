@@ -184,15 +184,23 @@ auto Assembler_x86_64::next() -> std::expected<void, AssembleError> {
             if (lexeme == "fn") {
                 return this->compile_function();
             } else {
-                // FIXME: Make this an unknown keyword/identifier error
-                fmt::println("unimplemented {}, skipping compilation!", lexeme);
+                // FIXME: Once we handle all the keyword/identifiers make this
+                //        an unknown keyword/identifier error
+                fmt::println(
+                  "[INTERNAL ERROR] unimplemented {} keyword/identifier "
+                  "compilation! (skipping)",
+                  lexeme
+                );
                 ++this->m_cursor;
             }
             break;
         }
         default: {
-            // FIXME: Make this an unknown token error
-            fmt::println("unimplemented {}, skipping compilation!", lexeme);
+            // FIXME: Once we handle all the tokens make this an unknown token error
+            fmt::println(
+              "[INTERNAL ERROR] unimplemented {} token compilation! (skipping)",
+              lexeme
+            );
             ++this->m_cursor;
         }
     }
@@ -257,7 +265,10 @@ auto Assembler_x86_64::compile_function()
 
     // Parse parameter list
     if (has_params) {
-        FMT_ASSERT(false, "unimplemented parsing function parameter list\n");
+        FMT_ASSERT(
+          false,
+          "[INTERNAL ERROR] Unimplemented function parameter list parsin\n"
+        );
         // const auto parameter_list = this->parse_function_parameter_list();
     }
 
