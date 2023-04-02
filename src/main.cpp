@@ -114,9 +114,6 @@ int main(const int argc, const char** argv) {
       Assembler_x86_64::compile(compiler, tokens.value());
 
     if (!compile_result.has_value()) {
-        fmt::print(
-          stderr, "[INTERNAL ERROR] compile error: {}\n", compile_result.error()
-        );
         compiler->print_errors();
         return 1;
     }
