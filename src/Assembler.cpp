@@ -283,9 +283,8 @@ auto Assembler_x86_64::compile_function()
 
     const auto end_token = this->peek();
     if (!end_token.has_value()) {
-        // FIXME: FXI THIS NOW!
         this->error(
-          "expected end token after function body", return_type.value().span()
+          "expected end token after function body", this->peek()->span()
         );
         return std::unexpected(AssembleError::NoEndToken);
     }
