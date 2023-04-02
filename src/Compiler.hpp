@@ -18,6 +18,8 @@ class Compiler {
     [[nodiscard]] auto errors() const -> std::vector<RackError>;
     [[nodiscard]] auto file_contents() const -> std::string;
 
+    [[nodiscard]] auto has_errors() const -> bool;
+
     void push_error(const RackError& error);
     void print_errors() const;
 

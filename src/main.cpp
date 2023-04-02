@@ -42,9 +42,8 @@ int main(const int argc, const char** argv) {
         return 1;
     }
 
-    // TODO: Add a shortcut such as compiler.has_errors()
     // As a final stage, print compiler errors if present
-    if (!compiler->errors().empty()) {
+    if (compiler->has_errors()) {
         compiler->print_errors();
         return 1;
     }

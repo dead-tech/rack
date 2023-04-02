@@ -14,6 +14,8 @@ auto Compiler::errors() const -> std::vector<RackError> {
     return this->m_errors;
 }
 
+auto Compiler::has_errors() const -> bool { return !this->m_errors.empty(); }
+
 auto Compiler::file_contents() const -> std::string {
     if (this->m_file_contents.empty()) {
         const auto contents = dts::read_file<std::string>(this->m_target);
