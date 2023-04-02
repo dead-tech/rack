@@ -52,7 +52,9 @@ int main(const int argc, const char** argv) {
     parser.add_argument("file").help("path to rack file to compile");
     parser.add_argument("-o", "--output").help("compiled binary output path");
     parser.add_argument("-s", "--generate-asm")
-      .help("generate assembly intermediate file");
+      .help("generate assembly intermediate file")
+      .default_value(false)
+      .implicit_value(true);
     parser.add_argument("-T", "--lexed-tokens")
       .help("prints lexed tokens to stdout")
       .default_value(false)
@@ -138,22 +140,36 @@ int main(const int argc, const char** argv) {
         );
     }
 
+    const std::string output_assembly_file =
+      fmt::format("{}.asm", output_file_path_without_extension);
+    const std::string output_object_file =
+      fmt::format("{}.o", output_file_path_without_extension);
+
     // Now we can invoke nasm and then link
     const std::string nasm_command = fmt::format(
-      "nasm -f elf64 {}.asm -o {}.o",
-      output_file_path_without_extension,
-      output_file_path_without_extension
+      "nasm -f elf64 {} -o {}", output_assembly_file, output_object_file
     );
 
     if (!invoke_external_command(nasm_command, verbose)) { return 1; }
 
-    const std::string ld_command = fmt::format(
-      "ld {}.o -o {}",
-      output_file_path_without_extension,
-      output_file_path.string()
-    );
+    const std::string ld_command =
+      fmt::format("ld {} -o {}", output_object_file, output_file_path.string());
 
     if (!invoke_external_command(ld_command, verbose)) { return 1; }
+
+    // Cleanup (delete intermediate files)
+
+    const std::string cleanup_command = [&]() {
+        if (parser["--generate-asm"] == true) {
+            return fmt::format("rm {}", output_object_file);
+        } else {
+            return fmt::format(
+              "rm {} {}", output_object_file, output_assembly_file
+            );
+        }
+    }();
+
+    if (!invoke_external_command(cleanup_command, verbose)) { return 1; }
 
     return 0;
 }
