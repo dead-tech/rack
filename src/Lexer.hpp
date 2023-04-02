@@ -5,6 +5,7 @@
 
 #include "Compiler.hpp"
 #include "Utility.hpp"
+#include <array>
 #include <cstdint>
 #include <expected>
 #include <fmt/format.h>
@@ -45,6 +46,7 @@ class Token {
     [[nodiscard]] auto span() const -> Span;
 
     [[nodiscard]] auto type_to_string() const -> std::string;
+    [[nodiscard]] auto is_keyword() const -> bool;
 
   private:
     Token(std::string lexeme, const TokenType type, const Span& span);

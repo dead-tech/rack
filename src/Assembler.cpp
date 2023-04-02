@@ -310,21 +310,18 @@ auto Assembler_x86_64::compile_function_body(const Span& begin_span)
                 break;
             }
             case TokenType::KeywordOrIdentifier: {
-                // FIXME: Make this a check like:
-                //        keyword => compile_keyword
-                //        else => function_call
-                if (token->lexeme() == "print") {
-                    this->writeln("\tpop rdi");
-                    this->writeln("\tcall print");
-                } else if (token->lexeme() == "puts") {
-                    this->writeln("\tpop r9");
-                    this->writeln("\tpop r8");
-                    this->writeln("\tcall puts");
+                if (token->is_keyword()) {
+                    const auto result = this->compile_keyword(token.value());
+                    if (!result.has_value()) {
+                        return std::unexpected(result.error());
+                    }
                 } else {
-                    fmt::print(stderr, "unimplemented {}", token->lexeme());
+                    const auto result =
+                      this->compile_function_call(token.value());
+                    if (!result.has_value()) {
+                        return std::unexpected(result.error());
+                    }
                 }
-
-                ++this->m_cursor;
                 break;
             }
             default: {
@@ -365,4 +362,33 @@ void Assembler_x86_64::compile_double_quoted_string(const Token& token) {
       fmt::format("\tpush str_{}", std::to_string(this->m_strings.size() - 1))
     );
     ++this->m_cursor;
+}
+
+auto Assembler_x86_64::compile_keyword([[maybe_unused]] const Token& token)
+  -> std::expected<void, AssembleError> {
+    fmt::print(
+      stderr, "[INTERNAL ERROR] compile_keyword(): is not implemented yet\n"
+    );
+    ++this->m_cursor;
+    return {};
+}
+
+auto Assembler_x86_64::compile_function_call(const Token& token)
+  -> std::expected<void, AssembleError> {
+    if (token.lexeme() == "print") {
+        this->writeln("\tpop rdi");
+        this->writeln("\tcall print");
+    } else if (token.lexeme() == "puts") {
+        this->writeln("\tpop r9");
+        this->writeln("\tpop r8");
+        this->writeln("\tcall puts");
+    } else {
+        this->error(
+          fmt::format("undeclared function {}", token.lexeme()), token.span()
+        );
+        return std::unexpected(AssembleError::UndeclaredFunction);
+    }
+
+    ++this->m_cursor;
+    return {};
 }

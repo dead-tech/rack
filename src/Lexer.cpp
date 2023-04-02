@@ -57,6 +57,13 @@ auto Token::type_to_string() const -> std::string {
     }
 }
 
+auto Token::is_keyword() const -> bool {
+    constexpr static std::array<std::string_view, 3> keywords = { "fn",
+                                                                  "begin",
+                                                                  "end" };
+    return std::ranges::find(keywords, this->m_lexeme) != keywords.end();
+}
+
 Token::Token(std::string lexeme, const TokenType type, const Span& span)
   : m_lexeme{ std::move(lexeme) },
     m_type{ type },

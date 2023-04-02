@@ -18,6 +18,7 @@ enum class AssembleError {
     MissingFunctionParametersOrReturnType,
     NoBeginToken,
     NoEndToken,
+    UndeclaredFunction,
     Max,
 };
 
@@ -77,7 +78,11 @@ class Assembler_x86_64 : public Assembler {
     [[nodiscard]] auto compile_function() -> std::expected<void, AssembleError>;
     [[nodiscard]] auto compile_function_body(const Span& begin_span)
       -> std::expected<void, AssembleError>;
-    void compile_double_quoted_string(const Token& token);
+    void               compile_double_quoted_string(const Token& token);
+    [[nodiscard]] auto compile_keyword(const Token& token)
+      -> std::expected<void, AssembleError>;
+    [[nodiscard]] auto compile_function_call(const Token& token)
+      -> std::expected<void, AssembleError>;
 
     std::shared_ptr<Compiler> m_compiler;
     std::vector<Token>        m_tokens;
@@ -95,7 +100,7 @@ struct fmt::formatter<AssembleError> {
     template<typename FormatContext>
     auto format(const AssembleError& error, FormatContext& ctx) {
         static_assert(
-          std::to_underlying(AssembleError::Max) == 6,
+          std::to_underlying(AssembleError::Max) == 7,
           "[INTERNAL ERROR] fmt::formatter<AssembleError> requires to handle "
           "all "
           "enum variants"
@@ -121,6 +126,9 @@ struct fmt::formatter<AssembleError> {
                 }
                 case AssembleError::NoEndToken: {
                     return "AssembleError::NoEndToken";
+                }
+                case AssembleError::UndeclaredFunction: {
+                    return "AssembleError::UndeclaredFunction";
                 }
                 default: {
                     return "Unknown Assemble Error";
