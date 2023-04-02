@@ -8,6 +8,34 @@
 #include "Compiler.hpp"
 #include "Lexer.hpp"
 
+static bool
+  invoke_external_command(const std::string& command, const bool verbose) {
+    if (verbose) { fmt::print(stdout, "[INFO] {}\n", command); }
+
+    const auto executable_name = [&]() {
+        if (const auto space_index = command.find(' ');
+            space_index != std::string::npos) {
+            return command.substr(0, space_index);
+        }
+        return command;
+    }();
+
+    // FIXME: There has to be a better way to do this
+    FILE* executable_process = popen(command.c_str(), "r");
+    if (executable_process == nullptr) {
+        fmt::print(
+          stderr, fmt::fg(fmt::color::red) | fmt::emphasis::bold, "error: "
+        );
+        fmt::print(
+          stderr, fmt::emphasis::bold, "{} not found\n", executable_name
+        );
+        return false;
+    }
+
+    pclose(executable_process);
+    return true;
+}
+
 int main(const int argc, const char** argv) {
     argparse::ArgumentParser parser("rack", "0.0.1");
     parser.add_argument("file").help("path to rack file to compile");
@@ -96,17 +124,7 @@ int main(const int argc, const char** argv) {
         }
     }();
 
-    if (parser["--verbose"] == true) {
-        fmt::print(stdout, "[INFO] {}\n", nasm_command);
-    }
-
-    // FIXME: There has to be a better way to do this (1)
-    FILE* nasm_process = popen(nasm_command.c_str(), "r");
-    if (nasm_process == nullptr) {
-        fmt::print(
-          stderr, fmt::fg(fmt::color::red) | fmt::emphasis::bold, "error: "
-        );
-        fmt::print(stderr, fmt::emphasis::bold, "nasm not found\n");
+    if (!invoke_external_command(nasm_command, parser.get<bool>("--verbose"))) {
         return 1;
     }
 
@@ -131,23 +149,9 @@ int main(const int argc, const char** argv) {
         }
     }();
 
-    pclose(nasm_process);
-
-    if (parser["--verbose"] == true) {
-        fmt::print(stdout, "[INFO] {}\n", ld_command);
-    }
-
-    // FIXME: There has to be a better way to do this (2)
-    FILE* ld_process = popen(ld_command.c_str(), "r");
-    if (ld_process == nullptr) {
-        fmt::print(
-          stderr, fmt::fg(fmt::color::red) | fmt::emphasis::bold, "error: "
-        );
-        fmt::print(stderr, fmt::emphasis::bold, "ld not found\n");
+    if (!invoke_external_command(ld_command, parser.get<bool>("--verbose"))) {
         return 1;
     }
-
-    pclose(ld_process);
 
     return 0;
 }
