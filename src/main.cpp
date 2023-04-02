@@ -1,3 +1,4 @@
+#include "Error.hpp"
 #define FMT_HEADER_ONLY
 #include <dtslib/filesystem.hpp>
 #include <fmt/printf.h>

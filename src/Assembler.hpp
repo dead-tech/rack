@@ -77,6 +77,7 @@ class Assembler_x86_64 : public Assembler {
     [[nodiscard]] auto compile_function() -> std::expected<void, AssembleError>;
     [[nodiscard]] auto compile_function_body(const Span& begin_span)
       -> std::expected<void, AssembleError>;
+    void compile_double_quoted_string(const Token& token);
 
     std::shared_ptr<Compiler> m_compiler;
     std::vector<Token>        m_tokens;

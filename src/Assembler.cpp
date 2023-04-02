@@ -111,6 +111,7 @@ auto Assembler_x86_64::generate_assembly_prelude() -> void {
     this->writeln("\tsyscall");
     this->writeln("\tret\n");
 }
+
 void Assembler_x86_64::generate_assembly_header() {
     this->writeln("BITS 64");
     this->writeln("section .text\n");
@@ -120,7 +121,6 @@ void Assembler_x86_64::generate_assembly_start_label() {
     this->writeln("global _start");
     this->writeln("_start:");
 
-    // FIXME: Maybe this shouldn't be hardcoded (?)
     this->writeln("\tcall func_main");
     this->writeln("\tmov rax, 60");
     this->writeln("\tmov rdi, 0");
@@ -307,27 +307,7 @@ auto Assembler_x86_64::compile_function_body(const Span& begin_span)
     while (token->lexeme() != "end") {
         switch (token->type()) {
             case TokenType::DoubleQuotedString: {
-                this->m_strings.push_back(token->lexeme());
-
-                const auto string_size = [&]() -> std::size_t {
-                    std::size_t occurrences = 0;
-                    std::size_t start       = 0;
-                    while ((start = token->lexeme().find("\\n", start))
-                           != std::string::npos) {
-                        ++occurrences;
-                        start += 2;
-                    }
-                    return token->lexeme().size() - occurrences;
-                }();
-
-                this->writeln(
-                  fmt::format("\tmov rax, {}", std::to_string(string_size))
-                );
-                this->writeln("\tpush rax");
-                this->writeln(fmt::format(
-                  "\tpush str_{}", std::to_string(this->m_strings.size() - 1)
-                ));
-                ++this->m_cursor;
+                this->compile_double_quoted_string(token.value());
                 break;
             }
             case TokenType::KeywordOrIdentifier: {
@@ -363,4 +343,27 @@ auto Assembler_x86_64::compile_function_body(const Span& begin_span)
     }
 
     return {};
+}
+
+// FIXME: This currently assumes it cannot fail, but maybe it can (?)
+void Assembler_x86_64::compile_double_quoted_string(const Token& token) {
+    this->m_strings.push_back(token.lexeme());
+
+    const auto string_size = [&]() -> std::size_t {
+        std::size_t occurrences = 0;
+        std::size_t start       = 0;
+        while ((start = token.lexeme().find("\\n", start)) != std::string::npos
+        ) {
+            ++occurrences;
+            start += 2;
+        }
+        return token.lexeme().size() - occurrences;
+    }();
+
+    this->writeln(fmt::format("\tmov rax, {}", std::to_string(string_size)));
+    this->writeln("\tpush rax");
+    this->writeln(
+      fmt::format("\tpush str_{}", std::to_string(this->m_strings.size() - 1))
+    );
+    ++this->m_cursor;
 }
