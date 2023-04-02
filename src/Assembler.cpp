@@ -172,9 +172,9 @@ auto Assembler_x86_64::next() -> std::expected<void, AssembleError> {
         return std::unexpected(current_token.error());
     }
 
-    const auto lexeme = current_token.value().lexeme();
+    const auto lexeme = current_token->lexeme();
 
-    switch (current_token.value().type()) {
+    switch (current_token->type()) {
         case TokenType::KeywordOrIdentifier: {
             static_assert(
               std::to_underlying(TokenType::Max) == 10,
@@ -247,12 +247,12 @@ auto Assembler_x86_64::compile_function()
         if (!next_token.has_value()) {
             this->error(
               "expected parameter list or return type after function name",
-              function_name.value().span()
+              function_name->span()
             );
             return false;
         }
 
-        return next_token.value().type() == TokenType::MinusMinus;
+        return next_token->type() == TokenType::MinusMinus;
     }();
 
     // Parse parameter list
@@ -263,12 +263,12 @@ auto Assembler_x86_64::compile_function()
 
     // Check return type
     const auto arrow = this->peek();
-    if (!arrow.has_value() || arrow.value().type() != TokenType::Arrow) {
+    if (!arrow.has_value() || arrow->type() != TokenType::Arrow) {
         // FIXME: This span is not always correct: it should be either the function name's
         //        span or the last function parameter's span
         this->error(
           "expected return type after function name or parameter list",
-          function_name.value().span()
+          function_name->span()
         );
         return std::unexpected(
           AssembleError::MissingFunctionParametersOrReturnType
@@ -281,7 +281,7 @@ auto Assembler_x86_64::compile_function()
     if (!return_type.has_value()) {
         this->error(
           "expected return type after function name or parameter list",
-          arrow.value().span()
+          arrow->span()
         );
         return std::unexpected(
           AssembleError::MissingFunctionParametersOrReturnType
@@ -292,8 +292,7 @@ auto Assembler_x86_64::compile_function()
     const auto begin_token = this->peek();
     if (!begin_token.has_value()) {
         this->error(
-          "expected begin after function return type",
-          return_type.value().span()
+          "expected begin after function return type", return_type->span()
         );
         return std::unexpected(AssembleError::NoBeginToken);
     }
